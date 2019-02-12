@@ -1,0 +1,369 @@
+% Type of the document
+\documentclass{beamer}
+
+% elementary packages:
+\usepackage{graphicx}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{eso-pic}
+\usepackage{mathrsfs}
+\usepackage{url}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{booktabs}
+
+% additional packages
+\usepackage{bbm}
+
+% packages supplied with ise-beamer:
+\usepackage{cooltooltips}
+\usepackage{colordef}
+\usepackage{beamerdefs}
+\usepackage{lvblisting}
+
+% Change the pictures here:
+% logobig and logosmall are the internal names for the pictures: do not modify them. 
+% Pictures must be supplied as JPEG, PNG or, to be preferred, PDF
+\pgfdeclareimage[height=2cm]{logobig}{hulogo}
+% Supply the correct logo for your class and change the file name to "logo". The logo will appear in the lower
+% right corner:
+\pgfdeclareimage[height=0.7cm]{logosmall}{Figures/LOB_Logo}
+
+% Title page outline:
+% use this number to modify the scaling of the headline on title page
+\renewcommand{\titlescale}{1.0}
+% the title page has two columns, the following two values determine the percentage each one should get
+\renewcommand{\titlescale}{1.0}
+\renewcommand{\leftcol}{0.6}
+
+% Define the title.Don't forget to insert an abbreviation instead 
+% of "title for footer". It will appear in the lower left corner:
+\title[Prime Factorization]{Prime Factorization}
+% Define the authors:
+\authora{Anna Friesen} % a-c
+
+% Define any internet addresses, if you want to display them on the title page:
+\def\linka{http://lvb.wiwi.hu-berlin.de}
+\def\linkb{}
+\def\linkc{}
+% Define the institute:
+\institute{Ladislaus von Bortkiewicz Chair of Statistics \\
+Humboldt--Universität zu Berlin \\}
+
+% Comment the following command, if you don't want, that the pdf file starts in full screen mode:
+\hypersetup{pdfpagemode=FullScreen}
+
+%Start of the document
+\begin{document}
+
+% create the title slide, layout controlled in beamerdefs.sty and the foregoing specifications
+\frame[plain]{
+\titlepage
+}
+
+% The titles of the different sections of you talk, can be included via the \section command. The title will be displayed in the upper left corner. To indicate a new section, repeat the \section command with, of course, another section title
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% (A numbering of the slides can be useful for corrections, especially if you are
+% dealing with large tex-files)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\frametitle{Motivation}
+\begin{itemize}
+\item RSA cryptosystem
+\item published in 1977 at the MIT 
+\item by Ron \textbf{R}ivest, Adi \textbf{S}hamir and Leonard \textbf{A}delman
+\item algorithm is based on two pairs of keys
+\begin{itemize}
+\item first pair $(N,E)$ to encrypt data
+\item second pair $(N,D)$ to decrypt the data 
+\end{itemize}
+\item $N$ is product of two large primes $p,q$ \\($\log(i) > 232, i = p,q$) 
+\item $N$ cannot be factored by now (computationally intractable  for classical (non-quantum) computers)
+\item using quantum computers, Shor's algorithm could factor $N$
+\item RSA ist still used to encrypt (still secure)
+\end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+%\frametitle{Motivation}
+
+\textbf{The RSA algorithm:}
+%
+\begin{itemize}
+\item let $OI$ be the original integer to be encrypted
+\item or transfer your text into an integer (e.\,g. number in alphabet)
+\end{itemize}
+\begin{enumerate}
+\item choose two random primes $p,q$
+\begin{itemize}
+\item $ p \cdot q = N > OI $ and $ p \neq q $ and $ \mid p - q \mid $ not too small
+\end{itemize}
+\item choose $E$ ($E$ prime suffices all conditions)
+\begin{itemize}
+\item $ E \in \{n \in \mathbb{N} \mid 2 \nmid n \}$ and $ E \nmid N $ and $  E > (p-1) \cdot (q-1)$
+\end{itemize}
+\item choose $D$
+\begin{itemize}
+\item $ (E \cdot D) mod ((p-1) \cdot (q-1)) = 1$
+\end{itemize}
+\end{enumerate}
+%
+\textbf{How to use the pairs of keys:}
+\begin{itemize}
+\item $ OI \overrightarrow{\tiny{\text{encrypt}}} CI: CI = OI^E mod (N) $ \\[0.2cm] 
+\item $ CI \overrightarrow{\tiny{\text{decrypt}}} OI: OI = CI^D mod (N) $ \\[0.2cm] 
+\end{itemize}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Prime Factorization}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Subsections are not visible on the actual slide, but are displayed as bookmarks in the pdf file. Their application facilitates an easy navigation trough large pdf files.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Trial Division}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\frametitle{Trial Division}
+
+\begin{itemize}
+\item the simplest (and most simple-minded) prime factorization algorithm
+\item assume $n$ is not prime, test for $2 \leq i \leq \lfloor \sqrt{n} \rfloor$ whether $i \mid n$
+\item  works quite well, because most coposite numbers have small prime factors
+\item inefficient if $n$ has large prime factors
+\begin{itemize}
+\item \textbf{efficient} algorithm has \textbf{polynomial} running time $f(\log_2(n))$, i.e. $f(\log_2(n))\;\in\;O((\log_2(n))^k) \text{ mit } k\ge 0$
+\end{itemize}
+\item modifications:
+\begin{itemize}
+\item choose $i \in \{k \in \mathbb{N} \mid 2\nmid k \}$
+\item choose fixed bound B: find $i \leq B$ (often $B = 10^6$)
+\item test primes $i \leq \lfloor \sqrt{r} \rfloor$ (sieve of Eratosthenes)
+\end{itemize}
+\end{itemize}
+}
+
+\frame{
+\frametitle{Sieve of Eratosthenes}
+%
+\begin{itemize}
+\item named by the greek mathematician Eratosthenes of Cyrene (3rd century BC)
+\item invented the name \textit{sieve} for known algorithm
+\item deterministic algorithm
+\item creates list of primes that are smaller than or eqal to a given integer $r \ge 2$
+\item running time $\log_2(r-1)\cdot (r-1)$ is \textit{exponentional}
+\end{itemize}
+%
+}
+
+\subsection{Modern factorization algorithms}
+\frame{
+\frametitle{Modern factorization algorithms}
+%
+\begin{itemize}
+	\item devided into two groups
+	\begin{itemize}
+		\item special purpose algorithms
+		\begin{itemize}
+			\item efficiency depends on factors of number being factored
+			\item e.g. Pollard (p-1) factorization method
+			\item not dangerous to RSA (RSA uses large primes)
+		\end{itemize}
+		\item general purpose algorithms
+		\begin{itemize}
+			\item efficiency depends only on number being factored
+			\item e.g. general number field sieve
+		\end{itemize}
+	\end{itemize}
+\end{itemize}
+%
+}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\subsection{Pollard (p-1) factorization method}
+%
+\frame{
+\frametitle{Pollard (p-1) factorization method}
+%
+\begin{itemize}
+\item based on Fermat´s little theorem
+\end{itemize}
+%
+\begin{theorem}[Fermat´s little theorem]
+%
+Let $p$ be prime ($p \in \mathbb{P}$) and $a \in \mathbb{Z}$ with $a<p$. Then it holds:
+\[
+p \in \mathbb{P} \;\Rightarrow\; a^{p} \; \equiv \; a \:(\text{mod}\, p)
+\]
+If additionally $a$ and $p$ have no common divisor, i.e. $\gcd(p,a)=1$, then it even holds:\par
+%
+\[
+p \in \mathbb{P} \;\Rightarrow\; a^{p-1} \; \equiv \; 1 \:(\text{mod}\, p)
+\]
+%
+\end{theorem}
+%
+\begin{itemize}
+\item cannot be used as a primality test
+\item $\Leftarrow$ does not hold
+\end{itemize}
+%
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+%\frametitle{Pollard (p-1) factorization method}
+%
+\begin{itemize}
+\item invented by John Pollard in 1974
+\item is a derivative of the Pollard rho method
+\item suitable for n that is $B$-smooth for $p-1$
+\begin{itemize}
+\item A smooth (or friable) number is an integer which factors completely into small prime numbers. For example, a 7-smooth number is a number whose prime factors are all at most 7.
+\end{itemize}
+\item uses that for any $a$ and $\forall p \in \mathbb{P} : a^{p-1} \,\equiv \, 1\:(\text{mod}\, n)$, i.e. $a^{p-1} -1 \,\equiv \, 0\:(\text{mod}\, n)$
+\end{itemize}
+%
+algorithm of Pollard´s rho method:
+%
+\begin{enumerate}
+\item pick two random numbers: $x \:(\text{mod}\, n) \text{ and } y \:(\text{mod}\, n)$
+\item If $x-y = 0 \:(\text{mod}\, n)$ we found a factor $gcd(x-y, n)$, else go to step 1
+\end{enumerate}
+%
+}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\frame{
+%\frametitle{Pollard (p-1) factorization method}
+%
+\textbf{Algorithm of the Pollard (p-1) factorization algorithm}
+%
+\begin{enumerate}
+\item Input: $n \ge 2$
+\item choose $a$ with $1 \leq a \leq n-1$ and arbitrary $B \in \mathbb{N}$
+\item $\forall q \in \mathbb{P}, q \leq B$:
+\begin{itemize}
+\item $a := a^q \:(\text{mod}\, n)$
+\item $p := gcd(a-1, n)$
+\item if  $p \mid n$ break
+\item else select new $a$ and go to step 3
+\end{itemize}
+\item return $p$
+\end{enumerate}
+%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\subsection{general number filed sieve}
+%
+%\frame{
+%\frametitle{general number field sieve}
+%
+%\begin{itemize}
+%\item most efficient known algorithm aside from Shor´s algorithm
+%\item is a generalization of special number field sieve (NFS)
+%\item special NFS can only factor certain numbers
+%\item running time is super-polynomial and subexponenetial
+%\item like the quadratic sieve it also is based on an enhancement of Fermat´s difference of squares technique (introduced by Maurice Kraitchik in the 1920s)
+%\begin{itemize}
+%\item instead of finding $x$ and $y$ such that $x^2-y^2 = n$ it suffices to find $x$ and $y$ such that $x^2 \, \equiv \, y^2\:(\text{mod}\, n) $
+%\end{itemize}
+%\item algorithms with subexponential running time are very complex and will not be presented in detail in the paper
+%\end{itemize}
+%}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{RSA-challenge}
+%
+\begin{frame}[fragile]
+\frametitle{RSA-challenge}
+%
+\begin{itemize}
+\item in 2009 RSA-768 was factored over the span of two years
+\item it is 768 bits and 232 decimal digits of size
+\item it is the largest solved RSA-challenge so far
+\item calculated with the general number field sieve
+\end{itemize}
+%
+
+RSA-768 = 334780716989568987860441698482126908177047949837\\
+137685689124313889828837938780022876147116525317\\
+43087737814467999489\\
+x\\
+367460436667995904282446337996279526322791581643\\
+430876426760322838157396665112792333734171433968\\
+10270092798736308917
+
+
+\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Further Information}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{
+\frametitle{For Further Reading}
+\begin{thebibliography}{aaaaaaaaaaaaaaaaa}
+\beamertemplatearticlebibitems
+\bibitem{Rempe:2009}
+Lasse Rempe, Rebecca Waldecker
+\newblock{\em Primzahltests für Einsteiger}
+\newblock 1. Auflage, Vieweg+Teubner Verlag, Wiesbaden 
+
+\beamertemplatearticlebibitems
+\bibitem{Dietzfelbinger:2004}
+Martin Dietzfelbinger
+\newblock{\em Primality Testing in Polynomial Time - From Randomized Algorithms to "`PRIMES is in P"'}
+\newblock 1.Auflage, Springer Verlag, Berlin Heidelberg  
+
+\beamertemplatearticlebibitems
+\bibitem{Brent}
+Richard P. Brent
+\newblock{\em Recent Progress and Prospects for Integer Factorisation Algorithms}
+
+\end{thebibliography}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{
+\frametitle{For Further Reading}
+\begin{thebibliography}{aaaaaaaaaaaaaaaaa}
+\beamertemplatearticlebibitems
+\bibitem{Kleinjung:2010}
+Thorsten Kleinjung and Kazumaro Aoki and Jens Franke and Arjen Lenstra and Emmanuel Thomé and Joppe Bos and Pierrick Gaudry and Alexander Kruppa and Peter Montgomery and Dag Arne Osvik and Herman te Riele and Andrey Timofeev and Paul Zimmermann
+\newblock{\em Factorization of a 768-bit RSA modulus}
+\newblock Cryptology ePrint Archive, Report 2010/006
+\newblock available on \href{https://eprint.iacr.org/2010/006}, 2018
+
+\end{thebibliography}
+}
+
+% Define the end of the document:
+\end{document}
